@@ -20,16 +20,19 @@ const sqlConfig = {
 };
 
 export async function getCon() {
+  // OPCION 1
   // const pool = await sql.connect(sqlConfig);
   // const result = await pool.request().query("SELECT * FROM PRODUCTO");
   // console.log(result);
 
+  // OPCION 2
   // await sql.connect(
   //   "Server=localhost,37027;Database=enviadortickets;User Id=agrance;Password=Paraguay2024;Encrypt=true;TrustServerCertificate=true"
   // );
   // const result = await sql.query`select * from usuarios`;
   // console.log(result);
 
+  // OPCION 3
   try {
     const pool = await sql.connect(sqlConfig);
     return pool;

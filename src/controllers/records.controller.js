@@ -1,21 +1,23 @@
 import { getCon } from "../database/index.js";
 
-export const getProduct = async (req, res) => {
+// GET Records
+export const getRecords = async (req, res) => {
   const pool = await getCon();
-  const result = await pool.request().query("SELECT * FROM PRODUCTO");
+  const result = await pool.request().query("SELECT * FROM REPORTES");
   console.log(result);
 
   res.json(result.recordset);
 };
 
-export const postProduct = async (req, res) => {
+// POST Record
+export const postRecord = async (req, res) => {
   console.log(req.body);
 
   try {
     const pool = await getCon();
     const result = await pool
       .request()
-      .query(`INSERT INTO PRODUCTO (nombre, descripcion, cantidad) VALUES ('TEST', 'TESTING', 1);`);
+      .query(`INSERT INTO REPORTES (nombre, detalle, fecha) VALUES ('Record', 'Record Details', '2024-01-01');`);
     console.log(result);
     res.send({
       msg: "recibido",

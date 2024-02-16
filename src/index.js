@@ -1,5 +1,5 @@
 import express, { json } from 'express';
-import productsRoutes from './routes/products.routes.js';
+import recordsRoutes from './routes/records.routes.js';
 import config from './config.js';
 
 const app = express();
@@ -10,11 +10,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Instanciar las rutas
-app.use(productsRoutes);
+app.use(recordsRoutes);
 
 // Metodos de index
 app.get('/', (req, res) => {
-  res.send({app: 'API - BOT NOTIFICADOR', client: 'HBSA'})
+  res.send({app: 'APP - BOT AUTOMATION', client: 'HBSA'})
 })
 
 app.listen(port, () => {
