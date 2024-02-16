@@ -37,7 +37,7 @@ cron.schedule("0 0 * * *", () => {
 // Obtiene los datos y realiza los envios
 async function getData() {
   const pool = await getCon();
-  const results = await pool.request().query("SELECT * FROM REPORTES WHERE ESTADO = 0");
+  const results = await pool.request().query("SELECT * FROM BOTES WHERE ESTADO = 0");
   result = results.recordset;
 
   console.log(result);
@@ -61,15 +61,15 @@ async function getData() {
               parameters: [
                 {
                   type: "text",
-                  text: res.nombre,
+                  text: res.embarcacion,
                 },
                 {
                   type: "text",
-                  text: res.detalle,
+                  text: moment(res.fecha_hora).format("DD-MM-YYYY"),
                 },
                 {
                   type: "text",
-                  text: moment(res.fecha).format("DD-MM-YYYY"),
+                  text: res.referencia,
                 },
               ],
             },
@@ -123,7 +123,7 @@ async function updateStatus(res) {
     const pool = await getCon();
     const results = await pool
       .request()
-      .query(`UPDATE reportes SET estado = 1 WHERE id = ${item.id};`);
+      .query(`UPDATE BOTES SET ESTADO = 1 WHERE id = ${item.id};`);
     result = results.recordset;
   }
 }
