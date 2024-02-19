@@ -3,7 +3,7 @@ import { getCon } from "../database/index.js";
 // GET Records
 export const getRecords = async (req, res) => {
   const pool = await getCon();
-  const result = await pool.request().query("SELECT * FROM REPORTES");
+  const result = await pool.request().query("SELECT * FROM BOTES");
   console.log(result);
 
   res.json(result.recordset);

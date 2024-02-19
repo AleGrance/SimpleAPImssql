@@ -7,10 +7,7 @@ import moment from "moment";
 // Params
 let counter = 0;
 let result = [];
-let recipients = [
-  { name: "Alejandro", number: "595986153301" },
-  { name: "Alejandro Corpo", number: "595974107341" },
-];
+let recipients = [];
 
 // 360dialog params
 const url = "https://waba-v2.360dialog.io/messages";
@@ -38,68 +35,76 @@ cron.schedule("0 0 * * *", () => {
 async function getData() {
   const pool = await getCon();
   const results = await pool.request().query("SELECT * FROM BOTES WHERE ESTADO = 0");
+  const resultsRecipients = await pool.request().query("SELECT * FROM DESTINATARIOS");
+
   result = results.recordset;
+  recipients = resultsRecipients.recordset;
 
   console.log(result);
 
   for (let res of result) {
     for (let item of recipients) {
-      const msgBody = {
-        messaging_product: "whatsapp",
-        to: item.number,
-        type: "template",
-        template: {
-          namespace: "c8ae5f90_307a_ca4c_b8f6_d1e2a2573574",
-          language: {
-            policy: "deterministic",
-            code: "es_ES",
-          },
-          name: "barcaza_info",
-          components: [
-            {
-              type: "BODY",
-              parameters: [
-                {
-                  type: "text",
-                  text: res.embarcacion,
-                },
-                {
-                  type: "text",
-                  text: moment(res.fecha_hora).format("DD-MM-YYYY"),
-                },
-                {
-                  type: "text",
-                  text: res.referencia,
-                },
-              ],
+      const template = res.tipo_notificacion == "AMARRE" ? "segundo_saludo" : "tercer_saludo";
+
+      if (res.tipo_notificacion == item.grupo) {
+        const msgBody = {
+          messaging_product: "whatsapp",
+          to: item.numero,
+          type: "template",
+          template: {
+            namespace: "c8ae5f90_307a_ca4c_b8f6_d1e2a2573574",
+            language: {
+              policy: "deterministic",
+              code: "es",
             },
-          ],
-        },
-      };
+            name: template,
+            components: [
+              {
+                type: "BODY",
+                parameters: [
+                  {
+                    type: "text",
+                    text: res.embarcacion,
+                  },
+                  {
+                    type: "text",
+                    text: moment(res.fecha_hora).format("DD-MM-YYYY HH:mm"),
+                  },
+                  {
+                    type: "text",
+                    text: res.referencia,
+                  },
+                ],
+              },
+            ],
+          },
+        };
 
-      await axios
-        .post(url, msgBody, { headers })
-        .then((response) => {
-          console.log("Success:");
-          console.log(response.data);
-          counter += 1;
-        })
-        .catch((error) => {
-          console.log("Axios error:");
-          console.log(error.code);
-        });
+        await axios
+          .post(url, msgBody, { headers })
+          .then((response) => {
+            console.log("Success:");
+            console.log(response.data);
+            counter += 1;
+          })
+          .catch((error) => {
+            console.log("Axios error:");
+            console.log(error.code);
+          });
 
-      //console.log(msgBody);
-      console.log(`Mensaje enviado Destinatario: ${item.name}`);
+        //console.log(msgBody);
+        console.log(`Mensaje enviado Destinatario: ${item.nombre}`);
+        console.log(`Mensaje enviado tipo: ${item.grupo}`);
 
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+      }
     }
   }
 
   console.log("Fin del envío");
   console.log("Cantidad enviada", counter);
   insertContadores(counter);
-  updateStatus(result);
+  //updateStatus(result);
 }
 
 // test
@@ -114,17 +119,17 @@ async function insertContadores(counter) {
   const results = await pool
     .request()
     .query(`INSERT INTO contadores (cant_envio, fecha_hora) VALUES (${counter}, GETDATE());`);
-  result = results.recordset;
+  //result = results.recordset;
 }
 
 // Actualiza el estado de los registros ya enviados para enviar solamente los que no se enviaron
-async function updateStatus(res) {
-  for (let item of res) {
+async function updateStatus(result) {
+  for (let item of result) {
     const pool = await getCon();
     const results = await pool
       .request()
       .query(`UPDATE BOTES SET ESTADO = 1 WHERE id = ${item.id};`);
-    result = results.recordset;
+    //result = results.recordset;
   }
 }
 
