@@ -7,5 +7,4 @@ router.get("/records", getRecords);
 
 router.post("/records", postRecord);
 
-
 export default router;

@@ -40,7 +40,7 @@ async function getData() {
   result = results.recordset;
   recipients = resultsRecipients.recordset;
 
-  console.log(result);
+  //console.log(result);
 
   for (let res of result) {
     for (let item of recipients) {
@@ -68,7 +68,7 @@ async function getData() {
                   },
                   {
                     type: "text",
-                    text: moment(res.fecha_hora).format("DD-MM-YYYY HH:mm"),
+                    text: moment(res.fecha_hora).format("DD/MM/YYYY HH:mm"),
                   },
                   {
                     type: "text",
@@ -93,8 +93,8 @@ async function getData() {
           });
 
         //console.log(msgBody);
-        console.log(`Mensaje enviado Destinatario: ${item.nombre}`);
-        console.log(`Mensaje enviado tipo: ${item.grupo}`);
+        //console.log(`Mensaje enviado Destinatario: ${item.nombre}`);
+        //console.log(`Mensaje enviado tipo: ${item.grupo}`);
 
         await new Promise((resolve) => setTimeout(resolve, 3000));
       }
@@ -104,17 +104,14 @@ async function getData() {
   console.log("Fin del envío");
   console.log("Cantidad enviada", counter);
   insertContadores(counter);
-  //updateStatus(result);
+  updateStatus(result);
 }
 
 // test
-getData();
+//getData();
 
 // Inserta el registro de los contadores tras cada envío del combo de mensajes
 async function insertContadores(counter) {
-  // const now = moment();
-  // const nowLocal = now.format('YYYY-MM-DD HH:mm');
-
   const pool = await getCon();
   const results = await pool
     .request()

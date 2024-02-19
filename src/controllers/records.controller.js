@@ -4,14 +4,14 @@ import { getCon } from "../database/index.js";
 export const getRecords = async (req, res) => {
   const pool = await getCon();
   const result = await pool.request().query("SELECT * FROM BOTES");
-  console.log(result);
+  //console.log(result);
 
   res.json(result.recordset);
 };
 
 // POST Record
 export const postRecord = async (req, res) => {
-  console.log(req.body);
+  //console.log(req.body);
 
   try {
     const pool = await getCon();
