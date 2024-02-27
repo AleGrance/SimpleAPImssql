@@ -7,6 +7,8 @@ export const getRecords = async (req, res) => {
   //console.log(result);
 
   res.json(result.recordset);
+  // Cerrar la conexión al finalizar la consulta
+  await pool.close();
 };
 
 // POST Record
@@ -17,17 +19,19 @@ export const postRecord = async (req, res) => {
     const pool = await getCon();
     const result = await pool
       .request()
-      .query(`INSERT INTO REPORTES (nombre, detalle, fecha) VALUES ('Record', 'Record Details', '2024-01-01');`);
+      .query(
+        `INSERT INTO REPORTES (nombre, detalle, fecha) VALUES ('Record', 'Record Details', '2024-01-01');`
+      );
     console.log(result);
     res.send({
       msg: "recibido",
     });
+    // Cerrar la conexión al finalizar la consulta
+    await pool.close();
   } catch (error) {
     console.log(error.originalError.info);
     res.send({
       msg: error.originalError.info,
     });
   }
-
-  
 };

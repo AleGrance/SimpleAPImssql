@@ -7,6 +7,8 @@ export const getDestinatarios = async (req, res) => {
   //console.log(result);
 
   res.json(result.recordset);
+  // Cerrar la conexión al finalizar la consulta
+  await pool.close();
 };
 
 // POST Destinatarios
@@ -18,19 +20,21 @@ export const postDestinatario = async (req, res) => {
     const pool = await getCon();
     const result = await pool
       .request()
-      .query(`INSERT INTO DESTINATARIOS (nombre, numero, grupo) VALUES ('${body.nombre}', '${body.numero}', '${body.grupo}');`);
+      .query(
+        `INSERT INTO DESTINATARIOS (nombre, numero, grupo) VALUES ('${body.nombre}', '${body.numero}', '${body.grupo}');`
+      );
     //console.log(result);
     res.send({
       msg: "Destinatario insertado con éxito.",
     });
+    // Cerrar la conexión al finalizar la consulta
+    await pool.close();
   } catch (error) {
     console.log(error.originalError.info);
     res.send({
       msg: error.originalError.info,
     });
   }
-
-  
 };
 
 // PUT Destinatarios
@@ -41,9 +45,7 @@ export const putDestinatario = async (req, res) => {
 
   try {
     const pool = await getCon();
-    const result = await pool
-      .request()
-      .query(`UPDATE DESTINATARIOS
+    const result = await pool.request().query(`UPDATE DESTINATARIOS
               SET nombre = '${body.nombre}', numero = '${body.numero}', grupo ='${body.grupo}'
               WHERE id = ${idDestinatario};`);
     //console.log(result);
@@ -56,6 +58,4 @@ export const putDestinatario = async (req, res) => {
       msg: error.originalError.info,
     });
   }
-
-  
 };

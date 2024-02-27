@@ -1,11 +1,16 @@
 import { Router } from "express";
-import { getContadores, getContadoresByDate } from "../controllers/contadores.controller.js";
+import { getContadores, getContadoresByDate, getContadoresByDateAcum, getContadoresByDateDet } from "../controllers/contadores.controller.js";
 
 const router = Router();
 
-// GET contadores
+// GET contadores (tabla contadores)
 router.get("/contadores", getContadores);
-// GET/POST contadores por fecha
+// GET/POST contadores por fecha todos (tabla contadores)
 router.post("/contadoresFecha", getContadoresByDate);
+
+// GET/POST contadores por fecha acumulado (tabla contadores_acum)
+router.post("/contadoresFechaAcumulado", getContadoresByDateAcum);
+// GET/POST contadores por fecha todos (tabla botes)
+router.post("/contadoresFechaDetallado", getContadoresByDateDet);
 
 export default router;
