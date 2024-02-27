@@ -13,8 +13,8 @@ let recipients = [];
 const url = "https://waba-v2.360dialog.io/messages";
 const headers = {
   "Content-type": "application/json",
-  //"D360-API-KEY": "0Eb5doP1x4hJXD9UQsuGDPPgAK",
-  "D360-API-KEY": "KjK54tUkyYSPUAnDaTRbnHeuAK",
+  "D360-API-KEY": "0Eb5doP1x4hJXD9UQsuGDPPgAK",
+  //"D360-API-KEY": "KjK54tUkyYSPUAnDaTRbnHeuAK",
 };
 
 /**
@@ -54,7 +54,8 @@ async function getData() {
     // Recorre los destinatarios
     for (let item of recipients) {
       const template =
-        bote.tipo_notificacion == "AMARRE" ? "first_notification" : "second_notification";
+        bote.tipo_notificacion == "AMARRE" ? "segundo_saludo" : "tercer_saludo";
+        //bote.tipo_notificacion == "AMARRE" ? "first_notification" : "second_notification";
 
       if (bote.tipo_notificacion == item.grupo) {
         const msgBody = {
@@ -124,7 +125,7 @@ async function getData() {
 }
 
 // test
-//getData();
+getData();
 
 // Inserta el registro de los contadores tras cada envío del combo de mensajes
 async function insertContadores(counter) {
@@ -166,8 +167,6 @@ async function insertContadoresAcum() {
     console.log('Error en catch', error);
   }
 }
-
-//insertContadoresAcum();
 
 // Actualiza el estado de los registros ya enviados para enviar solamente los que no se enviaron
 // async function updateStatus(result) {

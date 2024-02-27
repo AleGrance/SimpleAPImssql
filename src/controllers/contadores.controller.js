@@ -56,7 +56,7 @@ export const getContadoresByDateAcum = async (req, res) => {
 // GET Contadores por fecha DETALLADO (tabla botes)
 export const getContadoresByDateDet = async (req, res) => {
   const body = req.body;
-  console.log(body);
+  //console.log(body);
 
   try {
     const pool = await getCon();
@@ -69,7 +69,6 @@ export const getContadoresByDateDet = async (req, res) => {
       res.json(result.recordset);
       await pool.close();
     } else {
-      console.log("no vacio");
       const result = await pool.request().query(`SELECT * FROM botes b
       WHERE b.fecha_hora_envio BETWEEN '${body.fecha_desde} 00:00:00' AND '${body.fecha_hasta} 23:59:59'
       AND tipo_notificacion = '${body.tipo_notificacion}';`);
