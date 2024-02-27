@@ -13,7 +13,8 @@ let recipients = [];
 const url = "https://waba-v2.360dialog.io/messages";
 const headers = {
   "Content-type": "application/json",
-  "D360-API-KEY": "0Eb5doP1x4hJXD9UQsuGDPPgAK",
+  //"D360-API-KEY": "0Eb5doP1x4hJXD9UQsuGDPPgAK",
+  "D360-API-KEY": "KjK54tUkyYSPUAnDaTRbnHeuAK",
 };
 
 /**
@@ -29,6 +30,11 @@ cron.schedule("*/3 * * * *", async () => {
 // Programación del reset del contador (cada 00:00)
 cron.schedule("0 0 * * *", () => {
   counter = 0;
+});
+
+// Programación insersión de los contadores acumulados (cada 00:00)
+cron.schedule("0 0 * * *", () => {
+  insertContadoresAcum();
 });
 
 // Obtiene los datos y realiza los envios
@@ -47,7 +53,8 @@ async function getData() {
   for (let bote of botes) {
     // Recorre los destinatarios
     for (let item of recipients) {
-      const template = bote.tipo_notificacion == "AMARRE" ? "segundo_saludo" : "tercer_saludo";
+      const template =
+        bote.tipo_notificacion == "AMARRE" ? "first_notification" : "second_notification";
 
       if (bote.tipo_notificacion == item.grupo) {
         const msgBody = {
@@ -117,7 +124,7 @@ async function getData() {
 }
 
 // test
-getData();
+//getData();
 
 // Inserta el registro de los contadores tras cada envío del combo de mensajes
 async function insertContadores(counter) {
@@ -129,6 +136,38 @@ async function insertContadores(counter) {
   // Cerrar la conexión al finalizar la consulta
   await pool.close();
 }
+
+// Inserta el registro de los contadores acum
+async function insertContadoresAcum() {
+  const now = moment();
+  const nowLocal = now.format('YYYY-MM-DD');
+
+  const pool = await getCon();
+  try {
+    const results = await pool.request().query(`SELECT b.tipo_notificacion, COUNT(*) AS total_envio FROM botes b
+    WHERE b.fecha_hora_envio BETWEEN '${nowLocal} 00:00:00' AND '${nowLocal} 23:59:59'
+    GROUP BY b.tipo_notificacion;`);
+    const contadoresAcum = results.recordset;
+    console.log('los contadores', contadoresAcum);
+    
+    for (let item of contadoresAcum) {
+      const insertion = await pool.request().query(`INSERT INTO contadores_acum (
+        total_envio,
+        tipo_notificacion,
+        fecha)
+      VALUES(${item.total_envio}, '${item.tipo_notificacion}', GETDATE());`);
+    }
+
+    console.log('Se insertaron los contadores');
+
+    // Cerrar la conexión al finalizar la consulta
+    await pool.close();
+  } catch (error) {
+    console.log('Error en catch', error);
+  }
+}
+
+//insertContadoresAcum();
 
 // Actualiza el estado de los registros ya enviados para enviar solamente los que no se enviaron
 // async function updateStatus(result) {

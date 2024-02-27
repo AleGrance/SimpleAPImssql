@@ -1,6 +1,6 @@
 import { getCon } from "../database/index.js";
 
-// GET Contadores
+// GET Contadores/todos (tabla contadores)
 export const getContadores = async (req, res) => {
   const pool = await getCon();
   const result = await pool.request().query("SELECT * FROM CONTADORES");
@@ -9,7 +9,7 @@ export const getContadores = async (req, res) => {
   res.json(result.recordset);
 };
 
-// GET Contadores por fecha
+// GET Contadores/por fecha (tabla contadores)
 export const getContadoresByDate = async (req, res) => {
   const body = req.body;
   //console.log(body);
@@ -31,7 +31,7 @@ export const getContadoresByDate = async (req, res) => {
   }
 };
 
-// GET Contadores por fecha ACUMULADO
+// GET Contadores por fecha ACUMULADO (tabla contadores_acum)
 export const getContadoresByDateAcum = async (req, res) => {
   const body = req.body;
   //console.log(body);
@@ -39,9 +39,8 @@ export const getContadoresByDateAcum = async (req, res) => {
   try {
     const pool = await getCon();
     const result = await pool.request()
-      .query(`SELECT b.tipo_notificacion, COUNT(*) AS total_envio FROM botes b
-              WHERE b.fecha_hora_envio BETWEEN '${body.fecha_desde} 00:00:00' AND '${body.fecha_hasta} 23:59:59'
-              GROUP BY b.tipo_notificacion;`);
+      .query(`SELECT * FROM contadores_acum c
+              WHERE c.fecha BETWEEN'${body.fecha_desde} 00:00:00' AND '${body.fecha_hasta} 23:59:59';`);
     //console.log(result);
     res.json(result.recordset);
     // Cerrar la conexión al finalizar la consulta
@@ -54,7 +53,7 @@ export const getContadoresByDateAcum = async (req, res) => {
   }
 };
 
-// GET Contadores por fecha DETALLADO
+// GET Contadores por fecha DETALLADO (tabla botes)
 export const getContadoresByDateDet = async (req, res) => {
   const body = req.body;
   console.log(body);
