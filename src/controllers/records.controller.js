@@ -1,14 +1,14 @@
-import { getCon } from "../database/index.js";
+import { getCon, poolPromise } from "../database/index.js";
 
 // GET Records
 export const getRecords = async (req, res) => {
-  const pool = await getCon();
+  const pool = await poolPromise;
   const result = await pool.request().query("SELECT * FROM BOTES");
   //console.log(result);
 
   res.json(result.recordset);
-  // Cerrar la conexión al finalizar la consulta
-  await pool.close();
+  
+  
 };
 
 // POST Record
@@ -16,7 +16,7 @@ export const postRecord = async (req, res) => {
   //console.log(req.body);
 
   try {
-    const pool = await getCon();
+    const pool = await poolPromise;
     const result = await pool
       .request()
       .query(
@@ -26,8 +26,8 @@ export const postRecord = async (req, res) => {
     res.send({
       msg: "recibido",
     });
-    // Cerrar la conexión al finalizar la consulta
-    await pool.close();
+    
+    
   } catch (error) {
     console.log(error.originalError.info);
     res.send({

@@ -1,5 +1,5 @@
 // Libs
-import { getCon } from "../database/index.js";
+import { getCon, poolPromise } from "../database/index.js";
 import axios from "axios";
 import cron from "node-cron";
 import moment from "moment";
@@ -11,8 +11,8 @@ let counter = 0;
 const url = "https://waba-v2.360dialog.io/messages";
 const headers = {
   "Content-type": "application/json",
-  "D360-API-KEY": "0Eb5doP1x4hJXD9UQsuGDPPgAK",
-  //"D360-API-KEY": "KjK54tUkyYSPUAnDaTRbnHeuAK",
+  //"D360-API-KEY": "0Eb5doP1x4hJXD9UQsuGDPPgAK",
+  "D360-API-KEY": "KjK54tUkyYSPUAnDaTRbnHeuAK",
 };
 
 /**
@@ -37,7 +37,7 @@ cron.schedule("0 0 * * *", () => {
 
 // Obtiene los datos y realiza los envios
 async function getData() {
-  const pool = await getCon();
+  const pool = await poolPromise;
   const results = await pool.request().query("SELECT * FROM botes WHERE ESTADO = 0");
   const resultsRecipients = await pool.request().query("SELECT * FROM destinatarios");
 
@@ -51,8 +51,8 @@ async function getData() {
   for (let bote of botes) {
     // Recorre los destinatarios
     for (let destinatario of destinatarios) {
-      const template = bote.tipo_notificacion == "AMARRE" ? "segundo_saludo" : "tercer_saludo";
-      //bote.tipo_notificacion == "AMARRE" ? "first_notification" : "second_notification";
+      //const template = bote.tipo_notificacion == "AMARRE" ? "segundo_saludo" : "tercer_saludo";
+      const template = bote.tipo_notificacion == "AMARRE" ? "first_notification" : "second_notification";
 
       if (bote.tipo_notificacion == destinatario.grupo && destinatario.embarcacion.includes(bote.embarcacion)) {
         const msgBody = {
@@ -118,7 +118,6 @@ async function getData() {
   console.log("Fin del envío");
   console.log("Cantidad enviada", counter);
   insertContadores(counter);
-  //updateStatus(botes);
 }
 
 // test
@@ -126,13 +125,13 @@ async function getData() {
 
 // Inserta el registro de los contadores tras cada envío del combo de mensajes
 async function insertContadores(counter) {
-  const pool = await getCon();
+  const pool = await poolPromise;
   const results = await pool
     .request()
     .query(`INSERT INTO contadores (cant_envio, fecha_hora) VALUES (${counter}, GETDATE());`);
   //result = results.recordset;
-  // Cerrar la conexión al finalizar la consulta
-  await pool.close();
+  
+  
 }
 
 // Inserta el registro de los contadores acum
@@ -140,7 +139,7 @@ async function insertContadoresAcum() {
   const now = moment();
   const nowLocal = now.format("YYYY-MM-DD");
 
-  const pool = await getCon();
+  const pool = await poolPromise;
   try {
     const results = await pool.request()
       .query(`SELECT b.tipo_notificacion, COUNT(*) AS total_envio FROM botes b
@@ -159,22 +158,11 @@ async function insertContadoresAcum() {
 
     console.log("Se insertaron los contadores");
 
-    // Cerrar la conexión al finalizar la consulta
-    await pool.close();
+    
+    
   } catch (error) {
     console.log("Error en catch", error);
   }
 }
-
-// Actualiza el estado de los registros ya enviados para enviar solamente los que no se enviaron
-// async function updateStatus(result) {
-//   for (let item of result) {
-//     const pool = await getCon();
-//     const results = await pool.request().query(`UPDATE BOTES
-//               SET estado = 1, fecha_hora_envio = GETDATE()
-//               WHERE id = ${item.id};`);
-//     //result = results.recordset;
-//   }
-// }
 
 export * from "./connection.js";

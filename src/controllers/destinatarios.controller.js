@@ -1,14 +1,14 @@
-import { getCon } from "../database/index.js";
+import { getCon, poolPromise } from "../database/index.js";
 
 // GET Destinatarios
 export const getDestinatarios = async (req, res) => {
-  const pool = await getCon();
+  const pool = await poolPromise;
   const result = await pool.request().query("SELECT * FROM DESTINATARIOS");
   //console.log(result);
 
   res.json(result.recordset);
-  // Cerrar la conexión al finalizar la consulta
-  await pool.close();
+  
+  
 };
 
 // POST Destinatarios
@@ -17,7 +17,7 @@ export const postDestinatario = async (req, res) => {
   //console.log(body);
 
   try {
-    const pool = await getCon();
+    const pool = await poolPromise;
     const result = await pool
       .request()
       .query(
@@ -27,8 +27,8 @@ export const postDestinatario = async (req, res) => {
     res.send({
       msg: "Destinatario insertado con éxito.",
     });
-    // Cerrar la conexión al finalizar la consulta
-    await pool.close();
+    
+    
   } catch (error) {
     console.log(error.originalError.info);
     res.send({
@@ -44,7 +44,7 @@ export const putDestinatario = async (req, res) => {
   //console.log(body, idDestinatario);
 
   try {
-    const pool = await getCon();
+    const pool = await poolPromise;
     const result = await pool.request().query(`UPDATE DESTINATARIOS
               SET nombre = '${body.nombre}', numero = '${body.numero}', grupo ='${body.grupo}'
               WHERE id = ${idDestinatario};`);
