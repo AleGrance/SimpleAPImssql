@@ -6,8 +6,6 @@ import moment from "moment";
 
 // Params
 let counter = 0;
-let botes = [];
-let recipients = [];
 
 // 360dialog params
 const url = "https://waba-v2.360dialog.io/messages";
@@ -24,7 +22,7 @@ const headers = {
 // Programación de los envios (cada 3 min 24/7)
 cron.schedule("*/3 * * * *", async () => {
   console.log("Realizando consulta cronometrada...");
-  //getData();
+  getData();
 });
 
 // Programación del reset del contador (cada 00:00)
@@ -40,27 +38,26 @@ cron.schedule("0 0 * * *", () => {
 // Obtiene los datos y realiza los envios
 async function getData() {
   const pool = await getCon();
-  const results = await pool.request().query("SELECT * FROM BOTES WHERE ESTADO = 0");
-  const resultsRecipients = await pool.request().query("SELECT * FROM DESTINATARIOS");
+  const results = await pool.request().query("SELECT * FROM botes WHERE ESTADO = 0");
+  const resultsRecipients = await pool.request().query("SELECT * FROM destinatarios");
 
-  botes = results.recordset;
-  recipients = resultsRecipients.recordset;
+  const botes = results.recordset;
+  const destinatarios = resultsRecipients.recordset;
 
-  console.log("Registros obtenidos:", botes.length);
+  //console.log("Registros obtenidos:", botes.length);
   //console.log(recipients);
 
   // Recorre los registros
   for (let bote of botes) {
     // Recorre los destinatarios
-    for (let item of recipients) {
-      const template =
-        bote.tipo_notificacion == "AMARRE" ? "segundo_saludo" : "tercer_saludo";
-        //bote.tipo_notificacion == "AMARRE" ? "first_notification" : "second_notification";
+    for (let destinatario of destinatarios) {
+      const template = bote.tipo_notificacion == "AMARRE" ? "segundo_saludo" : "tercer_saludo";
+      //bote.tipo_notificacion == "AMARRE" ? "first_notification" : "second_notification";
 
-      if (bote.tipo_notificacion == item.grupo) {
+      if (bote.tipo_notificacion == destinatario.grupo && destinatario.embarcacion.includes(bote.embarcacion)) {
         const msgBody = {
           messaging_product: "whatsapp",
-          to: item.numero,
+          to: destinatario.numero,
           type: "template",
           template: {
             namespace: "c8ae5f90_307a_ca4c_b8f6_d1e2a2573574",
@@ -104,8 +101,8 @@ async function getData() {
           });
 
         //console.log(msgBody);
-        console.log(`Mensaje enviado Destinatario: ${item.nombre}`);
-        console.log(`Mensaje enviado tipo: ${item.grupo}`);
+        console.log(`Mensaje enviado Destinatario: ${destinatario.nombre}`);
+        console.log(`Mensaje enviado tipo: ${destinatario.grupo}`);
 
         await new Promise((resolve) => setTimeout(resolve, 3000));
       }
@@ -125,7 +122,7 @@ async function getData() {
 }
 
 // test
-getData();
+//getData();
 
 // Inserta el registro de los contadores tras cada envío del combo de mensajes
 async function insertContadores(counter) {
@@ -141,16 +138,17 @@ async function insertContadores(counter) {
 // Inserta el registro de los contadores acum
 async function insertContadoresAcum() {
   const now = moment();
-  const nowLocal = now.format('YYYY-MM-DD');
+  const nowLocal = now.format("YYYY-MM-DD");
 
   const pool = await getCon();
   try {
-    const results = await pool.request().query(`SELECT b.tipo_notificacion, COUNT(*) AS total_envio FROM botes b
+    const results = await pool.request()
+      .query(`SELECT b.tipo_notificacion, COUNT(*) AS total_envio FROM botes b
     WHERE b.fecha_hora_envio BETWEEN '${nowLocal} 00:00:00' AND '${nowLocal} 23:59:59'
     GROUP BY b.tipo_notificacion;`);
     const contadoresAcum = results.recordset;
-    console.log('los contadores', contadoresAcum);
-    
+    console.log("los contadores", contadoresAcum);
+
     for (let item of contadoresAcum) {
       const insertion = await pool.request().query(`INSERT INTO contadores_acum (
         total_envio,
@@ -159,12 +157,12 @@ async function insertContadoresAcum() {
       VALUES(${item.total_envio}, '${item.tipo_notificacion}', GETDATE());`);
     }
 
-    console.log('Se insertaron los contadores');
+    console.log("Se insertaron los contadores");
 
     // Cerrar la conexión al finalizar la consulta
     await pool.close();
   } catch (error) {
-    console.log('Error en catch', error);
+    console.log("Error en catch", error);
   }
 }
 
