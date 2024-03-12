@@ -1,6 +1,7 @@
 import sql from "mssql";
 import dotenv from "dotenv";
 const result = dotenv.config();
+import Sequelize from "sequelize";
 
 const sqlConfig = {
   user: process.env.DB_USER,
@@ -31,8 +32,19 @@ export async function getCon() {
   }
 }
 
-
 // OPCION 2
 const poolPromise = await sql.connect(sqlConfig);
 
-export { sql, poolPromise };
+// Conexión usando Sequelize
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PWD, {
+  dialect: 'mssql',
+  host: process.env.DB_SERVER,
+  port: parseInt(process.env.DB_PORT),
+  dialectOptions: {
+    options: {
+      encrypt: false, // Usar en caso de conexión segura (SSL/TLS)
+    },
+  },
+})
+
+export { sql, poolPromise, sequelize };

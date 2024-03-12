@@ -19,7 +19,7 @@ const headers = {
 // Programación de los envios (cada 3 min 24/7)
 cron.schedule("*/3 * * * *", async () => {
   console.log("Realizando consulta cronometrada...");
-  getData();
+  //getData();
 });
 
 // Programación insersión de los contadores acumulados (cada 00:00)
