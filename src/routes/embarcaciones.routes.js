@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getEmbarcaciones, getEmbarcacionesActivas, postEmbarcacion, putEmbarcacion } from "../controllers/embarcaciones.controller.js";
+import { deleteEmbarcacion, embarcacionesFiltered, getEmbarcaciones, getEmbarcacionesActivas, postEmbarcacion, putEmbarcacion } from "../controllers/embarcaciones.controller.js";
 
 const router = Router();
 
@@ -11,5 +11,9 @@ router.get("/EmbarcacionesActivas", getEmbarcacionesActivas);
 router.post("/Embarcaciones", postEmbarcacion);
 // PUT Embarcaciones
 router.put("/Embarcaciones/:id", putEmbarcacion);
+// DELETE destinatarios
+router.delete("/Embarcaciones/:id", deleteEmbarcacion);
+// PAGINATION
+router.post('/EmbarcacionesFiltered', embarcacionesFiltered);
 
 export default router;

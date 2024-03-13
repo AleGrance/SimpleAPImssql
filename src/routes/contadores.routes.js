@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getContadores, getContadoresByDate, getContadoresByDateAcum, getContadoresByDateDet } from "../controllers/contadores.controller.js";
+import { contadoresFiltered, getContadores, getContadoresByDate, getContadoresByDateAcum, getContadoresByDateDet } from "../controllers/contadores.controller.js";
 
 const router = Router();
 
@@ -12,5 +12,8 @@ router.post("/contadoresFecha", getContadoresByDate);
 router.post("/contadoresFechaAcumulado", getContadoresByDateAcum);
 // GET/POST contadores por fecha todos (tabla botes)
 router.post("/contadoresFechaDetallado", getContadoresByDateDet);
+
+// PAGINATION (tabla botes)
+router.post('/contadoresFiltered', contadoresFiltered);
 
 export default router;

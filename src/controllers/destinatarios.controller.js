@@ -57,6 +57,27 @@ export const putDestinatario = async (req, res) => {
   }
 };
 
+// DELETE Destinatarios
+export const deleteDestinatario = async (req, res) => {
+  const body = req.body;
+  const idDestinatario = req.params.id;
+  //console.log(body, idDestinatario);
+
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`DELETE FROM DESTINATARIOS WHERE id = ${idDestinatario};`);
+    //console.log(result);
+    res.send({
+      msg: "Destinatario eliminado con éxito.",
+    });
+  } catch (error) {
+    console.log(error.originalError.info);
+    res.send({
+      msg: error.originalError.info,
+    });
+  }
+};
+
 // PAGINATION
 // Modelo para la tabla Destinatarios
 const Destinatarios = sequelize.define("Destinatarios", {
