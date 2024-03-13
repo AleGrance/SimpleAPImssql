@@ -115,6 +115,13 @@ export const contadoresFiltered = async (req, res) => {
         condition += " referencia like '%" + searchable + "%' OR";
         condition += " tipo_notificacion like '%" + searchable + "%' OR";
         condition += " fecha_hora like '%" + searchable + "%'";
+      } else {
+        if (req.body.tipo_notificacion != "") {
+          condition += ` tipo_notificacion = '${req.body.tipo_notificacion}' AND`;
+          condition += ` fecha_hora_envio BETWEEN '${req.body.fecha_desde} 00:00:00' AND '${req.body.fecha_hasta} 23:59:59'`;
+        } else {
+          condition += ` fecha_hora_envio BETWEEN '${req.body.fecha_desde} 00:00:00' AND '${req.body.fecha_hasta} 23:59:59'`;
+        }
       }
     }
 
