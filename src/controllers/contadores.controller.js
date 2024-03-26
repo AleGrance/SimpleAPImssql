@@ -80,7 +80,7 @@ export const getContadoresByDateDet = async (req, res) => {
   }
 };
 
-// PAGINATION
+// PAGINATION - CONTADORES
 // Modelo para la tabla botes
 const Botes = sequelize.define("Botes", {
   embarcacion: Sequelize.STRING,
@@ -90,10 +90,11 @@ const Botes = sequelize.define("Botes", {
   fecha_hora: Sequelize.DATE,
   tipo_notificacion: Sequelize.STRING,
   fecha_hora_envio: Sequelize.DATE,
+  fecha_hora_reg: Sequelize.DATE,
 });
 
 export const contadoresFiltered = async (req, res) => {
-  console.log(req.body);
+  //console.log(req.body);
   const draw = req.body.draw;
   const start = req.body.start;
   const length = req.body.length;
@@ -141,6 +142,76 @@ export const contadoresFiltered = async (req, res) => {
     const order = [[orderColumn, orderDir]];
 
     Botes.findAndCountAll({
+      offset: start,
+      limit: length,
+      where: Sequelize.literal(condition),
+      order: order,
+      attributes: { exclude: ["createdAt", "updatedAt"] },
+    }).then((response) => {
+      result.recordsFiltered = response.count;
+      result.data = response.rows;
+      res.json(result);
+    });
+  });
+};
+
+// PAGINATION - CONTADORES ACUMULADOS
+// Modelo para la tabla botes
+const Contadores_acum = sequelize.define("Contadores_acum", {
+  total_envio: Sequelize.INTEGER,
+  tipo_notificacion: Sequelize.STRING,
+  fecha: Sequelize.DATE,
+},{
+  freezeTableName: true, // Evita la pluralización del nombre de la tabla
+});
+
+export const contadoresAcumFiltered = async (req, res) => {
+  //console.log(req.body);
+  const draw = req.body.draw;
+  const start = req.body.start;
+  const length = req.body.length;
+  const searchValue = req.body.search.value;
+  const orderColumnIndex = req.body.order[0].column;
+  const orderDir = req.body.order[0].dir;
+
+  var search_keyword = searchValue.replace(/[^a-zA-Z 0-9.]+/g, "").split(" ");
+
+  Contadores_acum.count().then((counts) => {
+    var condition = "";
+
+    for (var searchable of search_keyword) {
+      if (searchable != "") {
+        if (condition != "") {
+          condition += " OR ";
+        }
+        condition += " tipo_notificacion like '%" + searchable + "%' OR";
+        condition += " fecha '%" + searchable + "%'";
+      } else {
+        if (req.body.tipo_notificacion != "") {
+          condition += ` tipo_notificacion = '${req.body.tipo_notificacion}' AND`;
+          condition += ` fecha BETWEEN '${req.body.fecha_desde} 00:00:00' AND '${req.body.fecha_hasta} 23:59:59'`;
+        } else {
+          condition += ` fecha BETWEEN '${req.body.fecha_desde} 00:00:00' AND '${req.body.fecha_hasta} 23:59:59'`;
+        }
+      }
+    }
+
+    var result = {
+      data: [],
+      recordsTotal: 0,
+      recordsFiltered: 0,
+    };
+
+    if (!counts) {
+      return res.json(result);
+    }
+
+    result.recordsTotal = counts;
+
+    const orderColumn = req.body.columns[orderColumnIndex].data;
+    const order = [[orderColumn, orderDir]];
+
+    Contadores_acum.findAndCountAll({
       offset: start,
       limit: length,
       where: Sequelize.literal(condition),
